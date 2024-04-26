@@ -23,11 +23,11 @@ func ParseFields(fields []string) (string, error) {
 	}
 
 	schedule := schedule{
-		minutes:     expandField(fields[0], 0, 60),
-		hours:       expandField(fields[1], 0, 24),
+		minutes:     expandField(fields[0], 0, 59),
+		hours:       expandField(fields[1], 0, 23),
 		daysOfMonth: expandField(fields[2], 1, 31),
 		months:      expandField(fields[3], 1, 12),
-		daysOfWeek:  expandField(fields[4], 1, 7),
+		daysOfWeek:  expandField(fields[4], 0, 6),
 		command:     fields[5],
 	}
 
@@ -37,9 +37,9 @@ func ParseFields(fields []string) (string, error) {
 
 func expandField(field string, minVal, maxVal int) []int {
 	if field == "*" {
-		result := make([]int, maxVal)
-		for i := 0; i < maxVal; i++ {
-			result[i] = i
+		result := make([]int, maxVal-minVal+1)
+		for i := 0; i < maxVal-minVal+1; i++ {
+			result[i] = minVal + i
 		}
 		return result
 	}
@@ -48,7 +48,7 @@ func expandField(field string, minVal, maxVal int) []int {
 	if strings.Contains(field, "/") {
 		parts := strings.Split(field, "/")
 		step, _ := strconv.Atoi(parts[1])
-		for i := 0; i < maxVal; i += step {
+		for i := minVal; i <= maxVal; i += step {
 			result = append(result, i)
 		}
 		return result

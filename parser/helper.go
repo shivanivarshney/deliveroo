@@ -26,13 +26,6 @@ func cronToString(s schedule) string {
 
 }
 
-// func validateString(expression []string) error {
-// 	if len(expression) != 6 {
-// 		return fmt.Errorf("invalid cron string")
-// 	}
-// 	return nil
-// }
-
 func validateString(expression []string) error {
 	if len(expression) != 6 {
 		return fmt.Errorf("invalid cron string")
