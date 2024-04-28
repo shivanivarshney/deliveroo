@@ -16,10 +16,10 @@ To install this Cron Parser, you need to have Go installed on your system. Then,
 ```
 git clone https://github.com/shivanivarshney/deliveroo.git
 cd deliveroo
-go build
+go build cron_parser.go 
 
 ```
-This will create an executable binary named `cron-parser` in the current directory.
+This will create an executable binary named `cron_parser` in the current directory.
 
 
 ## Usage
