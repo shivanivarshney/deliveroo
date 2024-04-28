@@ -13,17 +13,17 @@ The Cron Parser is a command-line tool written in Go that parses a cron string a
 
 To install this Cron Parser, you need to have Go installed on your system. Then, you can clone the repository and build the binary:
 
-git clone https://github.com/shivanivarshney/deliveroo.git
+``` git clone https://github.com/shivanivarshney/deliveroo.git
 cd cron-parser
-go build
+go build ```
 
 This will create an executable binary named `cron-parser` in the current directory.
 
 ## Usage
 
 To use the Cron Parser, run the following command: 
-go build cron_parser.go
-./cron_parser "*/15 0 1,15 * 1-5 /usr/bin/find"
+
+`./cron_parser "*/15 0 1,15 * 1-5 /usr/bin/find"`
 
 ## output
 
