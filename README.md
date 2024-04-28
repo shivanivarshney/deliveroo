@@ -15,7 +15,7 @@ To install this Cron Parser, you need to have Go installed on your system. Then,
 
 ```
 git clone https://github.com/shivanivarshney/deliveroo.git
-cd cron-parser
+cd deliveroo
 go build
 
 ```
