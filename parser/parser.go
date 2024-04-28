@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// struct for schedule fields
 type schedule struct {
 	minutes     []int
 	hours       []int
@@ -14,6 +15,7 @@ type schedule struct {
 	command     string
 }
 
+// function exposed to main for parsing our cron string
 func ParseFields(fields []string) (string, error) {
 
 	err := validateString(fields)
@@ -35,7 +37,10 @@ func ParseFields(fields []string) (string, error) {
 
 }
 
+// function to read duratin string, based on min-max value creating final values
 func expandField(field string, minVal, maxVal int) []int {
+
+	// checking for "*" in the string duration
 	if field == "*" {
 		result := make([]int, maxVal-minVal+1)
 		for i := 0; i < maxVal-minVal+1; i++ {
@@ -44,6 +49,7 @@ func expandField(field string, minVal, maxVal int) []int {
 		return result
 	}
 
+	// checking for "/" in the string duration
 	var result []int
 	if strings.Contains(field, "/") {
 		parts := strings.Split(field, "/")
@@ -54,6 +60,7 @@ func expandField(field string, minVal, maxVal int) []int {
 		return result
 	}
 
+	// checking for "," in the string duration
 	ranges := strings.Split(field, ",")
 	for _, r := range ranges {
 		if strings.Contains(r, "-") {
