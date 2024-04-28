@@ -9,8 +9,6 @@ import (
 
 func main() {
 
-	fmt.Println("herre..")
-
 	// checking if no input provided through command line
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: ", os.Args[0], "<cron_string>")
