@@ -6,14 +6,10 @@ import (
 	"strings"
 )
 
-// defining the error variable for invalid cron string
+// defining the variable for validating string
 var (
-	errInvalidCron = fmt.Errorf("invalid cron string")
-	// errInvalidMinute     = fmt.Errorf("invalid minute range")
-	// errInvalidHour       = fmt.Errorf("invalid hour range")
-	// errInvalidDayOfMonth = fmt.Errorf("invalid day of month range")
-	// errInvalidMonth      = fmt.Errorf("invalid month range")
-	// errInvalidDayOFWeek  = fmt.Errorf("invalid day of week range")
+	fieldNames     = []string{"minute", "hour", "dayOfMonth", "month", "dayOfWeek"}
+	errInvalidCron = fmt.Errorf("invalid number of fields in cron expression")
 )
 
 // function to convert int slice to final string
@@ -39,68 +35,84 @@ func cronToString(s schedule) string {
 }
 
 // function to validate our schedule values have all exact fields or not
-func validateString(schedule []string) error {
-	fmt.Println("schedule", schedule)
-	if len(schedule) != 6 {
+func validateString(fields []string) error {
+
+	if len(fields) != 6 {
 		return errInvalidCron
 	}
 
-	// minutes, err := strconv.Atoi(expression[0])
-	// if err != nil {
-	// 	// Handle the error if the string cannot be converted to an integer
-	// 	return errInvalidMinute
-	// }
+	fields = fields[:len(fields)-1]
 
-	// // Handle the error if the string, if string is out of range
-	// if minutes < 0 || minutes > 59 {
-	// 	return errInvalidMinute
-	// }
+	// Define valid ranges for each field
+	validRanges := map[string][2]int{
+		"minute":     {0, 59},
+		"hour":       {0, 23},
+		"dayOfMonth": {1, 31},
+		"month":      {1, 12},
+		"dayOfWeek":  {0, 6},
+	}
 
-	// hour, err := strconv.Atoi(expression[1])
-	// if err != nil {
-	// 	// Handle the error if the string cannot be converted to an integer
-	// 	return errInvalidHour
-	// }
+	for i, field := range fields {
 
-	// // Handle the error if the string, if string is out of range
-	// if hour < 0 || hour > 23 {
-	// 	fmt.Println(expression[1])
-	// 	return errInvalidHour
-	// }
+		validRange := validRanges[fieldNames[i]]
 
-	// daysOfMonth, err := strconv.Atoi(expression[2])
-	// if err != nil {
-	// 	// Handle the error if the string cannot be converted to an integer
-	// 	return errInvalidDayOfMonth
-	// }
+		errMsg := fmt.Errorf("invalid value %s for %s field", field, fieldNames[i])
 
-	// // Handle the error if the string, if string is out of range
-	// if daysOfMonth < 1 || daysOfMonth > 31 {
-	// 	return errInvalidDayOfMonth
-	// }
+		if field == "*" {
+			continue
+		}
 
-	// month, err := strconv.Atoi(expression[3])
-	// if err != nil {
-	// 	// Handle the error if the string cannot be converted to an integer
-	// 	return errInvalidMonth
-	// }
+		if strings.Contains(field, "-") {
+			bounds := strings.Split(field, "-")
+			if len(bounds) != 2 {
+				return errMsg
+			}
+			start, err := strconv.Atoi(bounds[0])
+			if err != nil {
+				return errMsg
+			}
+			end, err := strconv.Atoi(bounds[1])
+			if err != nil {
+				return errMsg
+			}
+			if start < validRange[0] || end > validRange[1] || start > end {
+				return errMsg
+			}
+			continue
+		}
 
-	// // Handle the error if the string, if string is out of range
-	// if month < 1 || month > 12 {
-	// 	fmt.Println(expression[3])
-	// 	return errInvalidMonth
-	// }
+		if strings.Contains(field, "/") {
+			parts := strings.Split(field, "/")
+			if len(parts) != 2 {
+				return errMsg
+			}
 
-	// daysOfWeek, err := strconv.Atoi(expression[4])
-	// if err != nil {
-	// 	// Handle the error if the string cannot be converted to an integer
-	// 	return errInvalidDayOFWeek
-	// }
+			if parts[0] != "*" {
+				value, err := strconv.Atoi(parts[0])
+				if err != nil {
+					return errMsg
+				}
+				if value < validRange[0] || value > validRange[1] {
+					return errMsg
+				}
+			}
 
-	// // Handle the error if the string, if string is out of range
-	// if daysOfWeek < 0 || daysOfWeek > 6 {
-	// 	return errInvalidDayOFWeek
-	// }
+			step, err := strconv.Atoi(parts[1])
+			if err != nil || step <= 0 || step > validRange[1] {
+				return errMsg
+			}
+			continue
+		}
 
+		value, err := strconv.Atoi(field)
+		if err != nil {
+			return errMsg
+		}
+
+		if value < validRange[0] || value > validRange[1] {
+			return errMsg
+		}
+
+	}
 	return nil
 }

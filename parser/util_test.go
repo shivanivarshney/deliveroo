@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"strings"
 	"testing"
 )
 
@@ -69,10 +68,10 @@ func Test_cronToString(t *testing.T) {
 
 func Test_validateString(t *testing.T) {
 
-	mockFields := strings.Fields("* * * * * /usr/bin/find")
+	mockInput := []string{"*", "*", "*", "*", "*", "/usr/bin/find"}
 
 	type args struct {
-		expression []string
+		fields []string
 	}
 	tests := []struct {
 		name    string
@@ -80,19 +79,60 @@ func Test_validateString(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "invalid arguments",
-			args:    args{expression: []string{}},
+			name:    "case for valid string expression, return nil",
+			args:    args{fields: mockInput},
+			wantErr: false,
+		},
+		{
+			name:    "case for invalid string expression for month, return error",
+			args:    args{fields: []string{"*", "*", "*", "0/12", "7", "/usr/bin/find"}},
 			wantErr: true,
 		},
 		{
-			name:    "valid arguments",
-			args:    args{expression: mockFields},
-			wantErr: false,
+			name:    "case for invalid string expression for day of month, return error",
+			args:    args{fields: []string{"*", "*", "*/0", "*", "7", "/usr/bin/find"}},
+			wantErr: true,
+		},
+		{
+			name:    "case for invalid string expression for day of week, return error",
+			args:    args{fields: []string{"*", "*", "*", "*", "1-7", "/usr/bin/find"}},
+			wantErr: true,
+		},
+		{
+			name:    "case for invalid string expression for minute, return error",
+			args:    args{fields: []string{"60", "*", "*", "*", "*", "/usr/bin/find"}},
+			wantErr: true,
+		},
+		{
+			name:    "case for invalid string expression for hour when value not integer, return error",
+			args:    args{fields: []string{"*", "h", "*", "*", "1-7", "/usr/bin/find"}},
+			wantErr: true,
+		},
+
+		{
+			name:    "case for invalid string expression for range, return error",
+			args:    args{fields: []string{"-1", "h", "*", "*", "*", "/usr/bin/find"}},
+			wantErr: true,
+		},
+		{
+			name:    "case for invalid string expression for range with non-integer value, return error",
+			args:    args{fields: []string{"1-a", "h", "*", "*", "*", "/usr/bin/find"}},
+			wantErr: true,
+		},
+		{
+			name:    "case for invalid string expression for / with non-integer value, return error",
+			args:    args{fields: []string{"a/1", "h", "*", "*", "*", "/usr/bin/find"}},
+			wantErr: true,
+		},
+		{
+			name:    "case for invalid string expression for / , return error",
+			args:    args{fields: []string{"1/", "h", "*", "*", "*", "/usr/bin/find"}},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validateString(tt.args.expression); (err != nil) != tt.wantErr {
+			if err := validateString(tt.args.fields); (err != nil) != tt.wantErr {
 				t.Errorf("validateString() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
