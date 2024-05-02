@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// function exposed to main for parsing our cron string
+// ParseFields exposed to main for parsing our cron string
 func ParseFields(fields []string) (string, error) {
 
 	err := validateString(fields)
@@ -27,7 +27,7 @@ func ParseFields(fields []string) (string, error) {
 
 }
 
-// function to read duratin string, based on min-max value creating final values
+// expandField to read duratin string, based on min-max value creating final values
 func expandField(field string, minVal, maxVal int) []int {
 
 	// checking for "*" in the string duration
