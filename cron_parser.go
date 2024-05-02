@@ -11,8 +11,7 @@ func main() {
 
 	// checking if no input provided through command line
 	if len(os.Args) != 2 {
-		fmt.Println("Usage: ", os.Args[0], "<cron_string>")
-		return
+		panic(fmt.Sprintf("Command line arguments supplied are not valid: Example format: %s", "*/15 0 1,15 * 1-5 /usr/bin/find"))
 	}
 
 	// extract the input from argument & split that based on " " (whitespaces)
@@ -22,8 +21,7 @@ func main() {
 	// call parser function to parse fields to get the cron range
 	output, err := parser.ParseFields(fields)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		panic(err.Error())
 	}
 
 	fmt.Println(output)

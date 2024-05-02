@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -35,13 +37,6 @@ func Test_intSliceToString(t *testing.T) {
 
 func Test_cronToString(t *testing.T) {
 
-	mockOutput := "minute\t\t" + "1 2" + "\n"
-	mockOutput += "hour\t\t" + "1 2" + "\n"
-	mockOutput += "day of month\t" + "1 2" + "\n"
-	mockOutput += "month\t\t" + "1 2" + "\n"
-	mockOutput += "day of week\t" + "1 2" + "\n"
-	mockOutput += "command\t\t" + "/urs/bin/find"
-
 	type args struct {
 		s schedule
 	}
@@ -54,7 +49,7 @@ func Test_cronToString(t *testing.T) {
 			name: "valid arguments",
 			args: args{s: schedule{minutes: []int{1, 2},
 				hours: []int{1, 2}, daysOfMonth: []int{1, 2}, months: []int{1, 2}, daysOfWeek: []int{1, 2}, command: "/urs/bin/find"}},
-			want: mockOutput,
+			want: getMockOutput(),
 		},
 	}
 	for _, tt := range tests {
@@ -64,6 +59,26 @@ func Test_cronToString(t *testing.T) {
 			}
 		})
 	}
+}
+
+func getMockOutput() string {
+
+	var lines []string
+	minute := fmt.Sprintf("%s%s", "minute", strings.Repeat(" ", 10+2-len("minute"))+"1 2")
+	hour := fmt.Sprintf("%s%s", "hour", strings.Repeat(" ", 10+2-len("hour"))+"1 2")
+	dayOfMonth := fmt.Sprintf("%s%s", "dayOfMonth", strings.Repeat(" ", 10+2-len("dayOfMonth"))+"1 2")
+	month := fmt.Sprintf("%s%s", "month", strings.Repeat(" ", 10+2-len("month"))+"1 2")
+	dayOfWeek := fmt.Sprintf("%s%s", "dayOfWeek", strings.Repeat(" ", 10+2-len("dayOfWeek"))+"1 2")
+	command := fmt.Sprintf("%s%s", "command", strings.Repeat(" ", 10+2-len("command"))+"/urs/bin/find")
+	lines = append(lines, minute)
+	lines = append(lines, hour)
+	lines = append(lines, dayOfMonth)
+	lines = append(lines, month)
+	lines = append(lines, dayOfWeek)
+	lines = append(lines, command)
+
+	return strings.Join(lines, "\n")
+
 }
 
 func Test_validateString(t *testing.T) {

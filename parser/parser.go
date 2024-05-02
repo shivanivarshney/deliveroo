@@ -5,16 +5,6 @@ import (
 	"strings"
 )
 
-// struct for schedule fields
-type schedule struct {
-	minutes     []int
-	hours       []int
-	daysOfMonth []int
-	months      []int
-	daysOfWeek  []int
-	command     string
-}
-
 // function exposed to main for parsing our cron string
 func ParseFields(fields []string) (string, error) {
 

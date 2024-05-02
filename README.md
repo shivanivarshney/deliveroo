@@ -1,13 +1,15 @@
 # Cron Parser
 
 The Cron Parser is a command-line tool written in Go that parses a cron string and expands each field to show the times at which it will run.
+This utility enables a user to pass in arguments as a combination of cron expression + command in standard format 
 
 ## Features
 
 - Parses a cron string in the standard format with five time fields (minute, hour, day of month, month, and day of week) plus a command.
 - Supports special characters such as `*`, `,`, `-`, and `/`.
-- Allows specifying range using numerical values (0-6).
+- Allows specifying range using numerical values.
 - Does not require any external dependencies.
+- Pre-requiste: Git & Golang
 
 ## Installation
 
@@ -42,8 +44,28 @@ command /usr/bin/find
 
 ```
 
+## Unhandled fields/expressions
 
+For the sake of simplicity, only standard CRON expression format is supported for now
 
+List of not supported fields:
+
+```
+@yearly
+@annually
+@monthly
+@weekly
+@daily
+@hourly
+@reboot
+
+Month Range 
+Jan-Dec
+
+Week Range
+Sun-Sat
+
+```
 
 
 

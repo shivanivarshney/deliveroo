@@ -1,18 +1,13 @@
 package parser
 
 import (
+	"deliveroo/common"
 	"fmt"
 	"strconv"
 	"strings"
 )
 
-// defining the variable for validating string
-var (
-	fieldNames     = []string{"minute", "hour", "dayOfMonth", "month", "dayOfWeek"}
-	errInvalidCron = fmt.Errorf("invalid number of fields in cron expression")
-)
-
-// function to convert int slice to final string
+// intSliceToString convert int slice to final string
 func intSliceToString(slice []int) string {
 	strSlice := make([]string, len(slice))
 	for i, val := range slice {
@@ -21,42 +16,67 @@ func intSliceToString(slice []int) string {
 	return strings.Join(strSlice, " ")
 }
 
-// function to format the schedule as per the output
+// getFieldValues get fields values from schedule
+func (s *schedule) getFieldValues(field string) []int {
+	switch field {
+	case "minute":
+		return s.minutes
+	case "hour":
+		return s.hours
+	case "dayOfMonth":
+		return s.daysOfMonth
+	case "month":
+		return s.months
+	case "dayOfWeek":
+		return s.daysOfWeek
+	default:
+		return nil
+	}
+}
+
+// cronToString format the schedule as per the output
 func cronToString(s schedule) string {
 
-	output := "minute\t\t" + intSliceToString(s.minutes) + "\n"
-	output += "hour\t\t" + intSliceToString(s.hours) + "\n"
-	output += "day of month\t" + intSliceToString(s.daysOfMonth) + "\n"
-	output += "month\t\t" + intSliceToString(s.months) + "\n"
-	output += "day of week\t" + intSliceToString(s.daysOfWeek) + "\n"
-	output += "command\t\t" + s.command
-	return output
+	var lines []string
+	maxFieldLength := 0
+
+	// Calculate the maximum field length
+	for _, field := range common.Fields {
+		if len(field) > maxFieldLength {
+			maxFieldLength = len(field)
+		}
+	}
+
+	// Generate lines for each field
+	for _, field := range common.Fields {
+
+		var line string
+
+		if field == "command" {
+			line = fmt.Sprintf("%s%s", "command", strings.Repeat(" ", maxFieldLength+2-len("command"))+s.command)
+		} else {
+			line = fmt.Sprintf("%s%s%s", field, strings.Repeat(" ", maxFieldLength+2-len(field)), intSliceToString(s.getFieldValues(field)))
+
+		}
+		lines = append(lines, line)
+	}
+
+	return strings.Join(lines, "\n")
 
 }
 
-// function to validate our schedule values have all exact fields or not
+// validateString validate our schedule values have all exact fields or not (#modifiable when expansion for new strings)
 func validateString(fields []string) error {
 
 	if len(fields) != 6 {
-		return errInvalidCron
+		return common.ErrInvalidCronExp
 	}
 
 	fields = fields[:len(fields)-1]
 
-	// Define valid ranges for each field
-	validRanges := map[string][2]int{
-		"minute":     {0, 59},
-		"hour":       {0, 23},
-		"dayOfMonth": {1, 31},
-		"month":      {1, 12},
-		"dayOfWeek":  {0, 6},
-	}
-
 	for i, field := range fields {
 
-		validRange := validRanges[fieldNames[i]]
-
-		errMsg := fmt.Errorf("invalid value %s for %s field", field, fieldNames[i])
+		validRange := common.ValidRanges[common.Fields[i]]
 
 		if field == "*" {
 			continue
@@ -65,18 +85,18 @@ func validateString(fields []string) error {
 		if strings.Contains(field, "-") {
 			bounds := strings.Split(field, "-")
 			if len(bounds) != 2 {
-				return errMsg
+				return common.ErrInvalidIntervalRanges
 			}
 			start, err := strconv.Atoi(bounds[0])
 			if err != nil {
-				return errMsg
+				return common.ErrInvalidCronExp
 			}
 			end, err := strconv.Atoi(bounds[1])
 			if err != nil {
-				return errMsg
+				return common.ErrInvalidCronExp
 			}
 			if start < validRange[0] || end > validRange[1] || start > end {
-				return errMsg
+				return common.ErrInvalidIntervalLimits
 			}
 			continue
 		}
@@ -84,33 +104,33 @@ func validateString(fields []string) error {
 		if strings.Contains(field, "/") {
 			parts := strings.Split(field, "/")
 			if len(parts) != 2 {
-				return errMsg
+				return common.ErrInvalidIntervalRanges
 			}
 
 			if parts[0] != "*" {
 				value, err := strconv.Atoi(parts[0])
 				if err != nil {
-					return errMsg
+					return common.ErrInvalidCronExp
 				}
 				if value < validRange[0] || value > validRange[1] {
-					return errMsg
+					return common.ErrInvalidIntervalLimits
 				}
 			}
 
 			step, err := strconv.Atoi(parts[1])
 			if err != nil || step <= 0 || step > validRange[1] {
-				return errMsg
+				return common.ErrInvalidExpSteps
 			}
 			continue
 		}
 
 		value, err := strconv.Atoi(field)
 		if err != nil {
-			return errMsg
+			return common.ErrInvalidCronExp
 		}
 
 		if value < validRange[0] || value > validRange[1] {
-			return errMsg
+			return common.ErrInvalidIntervalLimits
 		}
 
 	}
